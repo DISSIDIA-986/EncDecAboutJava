@@ -1,5 +1,7 @@
 # EncDecAboutJava
 The Art Of Encryption And Decryption About Java example code
-²Î¼ûÊé¼®<<Java¼ÓÃÜÓë½âÃÜµÄÒÕÊõ>> Áº¶°Öø
-¶ÁÊé±Ê¼Ç¼û ÎÒµÄCSDN
+
+
+å‚è§ä¹¦ç±<<JavaåŠ å¯†ä¸è§£å¯†çš„è‰ºæœ¯>> æ¢æ ‹è‘—
+è¯»ä¹¦ç¬”è®°è§æˆ‘çš„CSDN
 http://blog.csdn.net/u013695144
