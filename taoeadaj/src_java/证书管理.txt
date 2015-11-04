@@ -1,0 +1,121 @@
+-------证书管理
+-------keytool证书管理
+代码清单10-2 生成本地数字证书1
+使用"www.zlex.org"作为别名alias,使用RSA作为加密算法，并规定密钥长度为2048位，使用SHA1withRSA作为数字签名算法,签发有效期为36000天的数字证书，代码如下:
+keytool =genkeypair -keyalg RSA -keysize 2048 -sigalg SHA1withRSA -validity 36000 -alias www.zlex.org -keystore zlex.keystore
+#####
+代码清单10-2 生成本地数字证书2
+代替上述手动输入用户信息的完整命令如下:
+keytool =genkeypair -keyalg RSA -keysize 2048 -sigalg SHA1withRSA -validity 36000 -alias www.zlex.org -keystore zlex.keystore -dname "CN=www.zlex.org, OU=zlex, O=zlex, L=BJ, ST=BJ, C=CN"
+#####
+代码清单10-3 导出数字证书
+keytool -exportcert -alias www.zlex.org -keystore zlex.keystore -file zlex.cer -rfc
+#####
+代码清单10-4 导出数字证书2
+keytool -exportcert -alias www.zlex.org -keystore zlex.keystore -file zlex.cer -rfc -storepass 123456
+##### 
+代码清单10-5 打印数字证书
+keytool -printcert -file zlex.cer
+##### 
+代码清单10-6 生成数字证书签发申请
+keytool -certreq -alias www.zlex.org -keystore zlex.keystore -file zlex.cer -v
+##### 
+代码清单10-7 导入数字证书
+keytool -importcert -trustcacerts -alias www.zlex.org -file zlex.cer -keystore zlex.keystore
+##### 
+代码清单10-8 列出密钥库中的条目
+keytool -list -alias www.zlex.org -keystore zlex.keystore
+
+
+
+-------openssl证书管理
+##### 
+代码清单10-10 构建CA目录
+echo 构建已发行证书存放目录 certs
+mkdir certs
+echo 构建新证书存放目录 newcerts
+mkdir newcerts
+echo 构建私钥存放目录 private
+mkdir private
+echo 构建证书吊销列表存放目录 crl
+mkdir crl
+
+##### 
+代码清单10-11 构建相关文件
+echo 构建索引文件 index.txt
+echo 0>index.txt
+echo 构建序列号文件 serial
+echo 01>serial
+
+##### 
+代码清单10-12 构建随机数
+echo 构建随机数 private/.rand
+openssl rand -out private/.rand 1000
+
+##### 
+代码清单10-13 构建根证书私钥
+—-构建根证书私钥
+echo 构建根证书私钥 private/ca.key.pem
+openssl genrsa -aes256 -out private/ca.key.pem 2048
+
+##### 
+代码清单10-14 生成根证书签发申请
+--生成根证书签发申请
+echo 生成根证书签发申请 private/ca.csr
+openssl req -new -key private/ca.key.pem -out private/ca.csr -subj “/C=CNST=BJ/L=BJ/O=zlex/OU=zlex/CN=*.zlex.org"
+
+##### 
+代码清单10-15 签发根证书
+echo 签发根证书 private/ca.cer
+openssl x509 -req -days 10000 -sha1 -extensions v3_ca -signkey private/ca.key.pem -in private/ca.csr -out certs/ca.cer
+
+##### 
+代码清单10-16 根证书转换
+echo 根证书转换 private/ca.p12
+openssl pkcs12 -export -cacerts -inkey private/ca.key.pem -in certs/ca.cer -out certs/ca.p12
+
+##### 
+代码清单10-17 查看密钥库信息
+echo 查看密钥库信息
+keytool -list -keystore certs/ca.p12 -storetype pkcs12 -v -storepass 123456
+
+##### 
+代码清单10-18 构建服务器私钥
+echo 构建服务器私钥 private/server.key.pem
+openssl genrsa -aes256 -out private/server.key.pem 2048
+
+##### 
+代码清单10-19 生成服务器证书签发申请
+echo 生成服务器证书签发申请 private/server.csr
+openssl req -new -key private/server.key.pem -out private/server.csr -subj “*/C=CN/ST=BJ/L=BJ/O=zlex/OU=zlex/CN=www.zlex.org"
+
+##### 
+代码清单10-20 签发服务器证书
+echo 签发服务器证书 private/server.csr
+openssl x509 -req -days 3650 -sha1 -extensions v3_req -CA certs/ca.cer -CAkey
+private/ca.key.pem -CAserial ca.srl -CAcreateserial -in private/server.csr -out certs/server.cer
+
+##### 
+代码清单10-21 服务器证书转换 
+echo 服务器证书转换 private/server.p12
+openssl pkcs12 -export -clcerts -inkey private/server.key.pem -in certs/server.cer -out certs/server.p12
+
+##### 
+代码清单10-22 产生客户私钥 
+echo 产生客户私钥 private/client.key.pem
+openssl genrsa -aes256 -out private/client.key.pem 2048
+
+##### 
+代码清单10-23 生成客户证书签发申请 
+echo 生成客户证书签发申请 client.csr
+openssl req -new -key private/client.key.pem -out private/client.csr -subj “*/C=CN/ST=BJ/L=BJ/O=zlex/OU=zlex/CN=zlex"
+
+##### 
+代码清单10-24 签发客户证书 
+echo 签发客户证书
+openssl ca -days 3650 -in private/client.csr -out certs/client.cer -cert certs/ca.cer -keyfile private/ca.key.pem
+
+##### 
+代码清单10-25 客户证书转换 
+echo 客户证书转换 certs/client.p12
+openssl pkcs12 -export -inkey private/client.key.pem -in certs/client.cer -out certs/client.p12
