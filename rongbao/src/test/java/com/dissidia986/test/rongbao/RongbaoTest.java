@@ -31,16 +31,16 @@ public class RongbaoTest extends TestBase {
 	public void agentPay() throws JsonProcessingException {
 		ReturnResult result=null;
 		try {
-			String ownerName="牛郁坡";
-			String identity="410181198611231550";
-			String mobile="15238307780";
-			String bankCardNo="6227002435011133237";
+			String ownerName="持卡人姓名";
+			String identity="持卡人身份证号";
+			String mobile="持卡人手机号";
+			String bankCardNo="银行卡号";
 			String money="0.1";
 			String openBank="建设银行";
 			String branchBank="分行";
 			String subBank="支行";
-			String openBankProvince="河南";
-			String openBankCity="郑州";
+			String openBankProvince="开户省";
+			String openBankCity="开户市";
 			result=reapalService.agentPay(ownerName, identity, mobile, money, bankCardNo, openBank, branchBank, subBank, openBankProvince, openBankCity);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,10 +70,10 @@ public class RongbaoTest extends TestBase {
 	public void bindQuickPay() throws JsonProcessingException {
 		String bind_id="5438";
 		String total_fee="0.1";
-		String title="15238307780"+"充值";
+		String title="持卡人手机号"+"充值";
 		String order_no="1015120113412041247";
 		String member_id="5438";
-		String terminal_info = "15238307780";
+		String terminal_info = "持卡人手机号";
 		
 		ReturnResult result=null;
 		try {
@@ -87,7 +87,7 @@ public class RongbaoTest extends TestBase {
 	
 	@Test
 	public void queryCardInfoQuickPay() throws JsonProcessingException {
-		String bankCardNo="6227002435011133237";
+		String bankCardNo="银行卡号";
 		
 		ReturnResult result=null;
 		try {
@@ -108,17 +108,17 @@ public class RongbaoTest extends TestBase {
 	 */
 	@Test
 	public void subscribeQuickPay() throws JsonProcessingException {
-		String ownerName="牛郁坡";
-		String identity="410181198611231550";
-		String mobile="15238307780";
-		String bankCardNo="6227002435011133237";
+		String ownerName="持卡人姓名";
+		String identity="持卡人身份证号";
+		String mobile="持卡人手机号";
+		String bankCardNo="银行卡号";
 		String money="0.1";
 		String openBank="建设银行";
 		String branchBank="分行";
 		String subBank="支行";
-		String openBankProvince="河南";
-		String openBankCity="郑州";
-		String esn = "866001021972782";
+		String openBankProvince="开户省";
+		String openBankCity="开户市";
+		String esn = "手机设备号";
 		String userId="5438";
 		
 		ReturnResult result=null;
