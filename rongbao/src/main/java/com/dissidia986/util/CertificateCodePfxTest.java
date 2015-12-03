@@ -1,7 +1,7 @@
 package com.dissidia986.util;
 
 import org.apache.commons.codec.binary.Hex;
-import org.springframework.security.crypto.codec.Base64;
+import org.bouncycastle.util.encoders.Base64;
 
 public class CertificateCodePfxTest {
 	private String password = "wdwyfy";
