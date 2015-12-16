@@ -27,4 +27,5 @@ public interface ReapalService {
 	
 	ReturnResult queryCardInfo(String card_no) throws Exception;
 	ReturnResult queryOrder(String order_no) throws Exception;
+	ReturnResult paysinglequery(String batchDate, String batchCurrnum,String tradenum,String tradecustorder);
 }

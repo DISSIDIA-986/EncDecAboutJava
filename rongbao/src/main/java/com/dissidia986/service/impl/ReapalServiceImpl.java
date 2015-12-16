@@ -27,7 +27,7 @@ import com.dissidia986.service.ReapalService;
 import com.dissidia986.util.DateUtil;
 import com.dissidia986.util.WtUtils;
 
-@PropertySource("classpath:reapal-morshare.properties")
+@PropertySource("classpath:reapal-credit90.properties")
 @Service
 public class ReapalServiceImpl implements ReapalService {
 	@Value("${reapal.merchant_id}")
@@ -63,6 +63,8 @@ public class ReapalServiceImpl implements ReapalService {
 	private String batchCount;
 	@Value("${reapal.agentpay.payqueryaction}")
 	private String payqueryaction;
+	@Value("${reapal.agentpay.paysinglequery}")
+	private String paysinglequery;
 	@Value("${morsharePrivateKey}")
 	private String morsharePrivateKey;
 	@Value("${morsharePublicKey}")
@@ -259,6 +261,7 @@ public class ReapalServiceImpl implements ReapalService {
 			logger.debug("转义前:{}|转义后:{}",response,results);
 			logger.debug("提现耗时:{} ms",(System.currentTimeMillis()-currentTime));
 			if(StringUtils.containsIgnoreCase(results,"succ")){
+				logger.warn("realName={}|batchDate={}|batchCurrnum={}|serialNum={}|order_no={}|提现",realName,batchDate,batchCurrnum,serialNum,order_no);
 				return result("1","提现成功","");
 			}else{
 				return domParse(results);
@@ -332,7 +335,11 @@ public class ReapalServiceImpl implements ReapalService {
 	public static Document getDocument(String content) throws DocumentException {
         return DocumentHelper.parseText(content);
     }
-
+	
+	/**
+	 * 出金查询接口
+	 * http://entrust.reapal.com/agentpay/payquery
+	 */
 	public ReturnResult agentPayQuery(String batchDate, String batchCurrnum) {
 		try {
 			Map<String, String> sPara = new HashMap<String, String>();
@@ -363,7 +370,50 @@ public class ReapalServiceImpl implements ReapalService {
 			return result("2", "系统异常,查询支付记录失败", "");
 		}
 	}
-	
+	/**
+	 * 代付出金查询批次明细接口
+	          请求参数列表
+	          查询订单提交地址: http://entrust.reapal.com/agentpay/paysinglequery?
+	 * @param batchDate
+	 * @param batchCurrnum
+	 * @return
+	 */
+	public ReturnResult paysinglequery(String batchDate, String batchCurrnum,String tradenum,String tradecustorder){
+		try {
+			Map<String, String> sPara = new HashMap<String, String>();
+			sPara.put("batchBizid", batchBizid);
+			sPara.put("batchVersion", batchVersion);
+			sPara.put("batchDate", batchDate);
+			sPara.put("batchCurrnum", batchCurrnum);
+			sPara.put("_input_charset", "utf8");
+			sPara.put("tradenum", tradenum);
+			sPara.put("tradecustorder", tradecustorder);
+			String sign = WtUtils.buildReapalSign(sPara, agentpaySignkey,"utf8");
+			sPara.put("signType", signType);
+			sPara.put("sign", sign);
+			long currentTime = System.currentTimeMillis();
+			String response = WtUtils.reapalPost(paysinglequery, sPara);
+			//分行合并
+			response = response.replace("\n", "").replace("\r", "").replaceAll("\\s*", "").replaceAll(" ", "");
+			logger.debug("换行重新合并后:{}",response.toString());
+			response = WtUtils.decryptByRongbaoPrivateKey(response.toString(), rongbaoPrivateKey, rongbaoPrivateKeyAlias, rongbaoPrivateKeyPassword, "utf8");
+			String results = WtUtils.unescapeChineseUnicode(response.toString());
+			logger.debug("转义前:{}|转义后:{}",response,results);
+			logger.debug("提现耗时:{} ms",(System.currentTimeMillis()-currentTime));
+			if(StringUtils.containsIgnoreCase(results,"fail")){
+				return domParse(results);
+			}else{
+				return result("1","查询成功",results);
+			}
+		} catch (Exception e) {
+			logger.error("代付接口异常:", e);
+			return result("2", "系统异常,查询支付记录失败", "");
+		}
+	}
+	/**
+	 * 快捷支付-卡信息查询
+	 * @return {"bank_card_type":"0","bank_code":"CCB","bank_name":"建设银行","card_no":"银行卡号","merchant_id":"商户号"}
+	 */
 	@Transactional
 	public ReturnResult queryCardInfo(String card_no) throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>(0);
@@ -373,7 +423,7 @@ public class ReapalServiceImpl implements ReapalService {
 		StringBuilder reqStr = WtUtils.CreateLinkString(map);
 		String mysign = WtUtils.buildReapalSign(map, quickpaySignkey,null);// 生成签名结果
 
-		System.out.println("验签之前==========>" + mysign);
+		
 		map.put("sign", mysign);
 		String json = (String) WtUtils.writeObjectAsString(map);
 

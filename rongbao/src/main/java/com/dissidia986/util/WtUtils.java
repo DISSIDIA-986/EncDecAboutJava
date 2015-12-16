@@ -495,10 +495,11 @@ public class WtUtils {
     	String result = null;
     	if(sArray!=null && sArray.size()>0){
             StringBuilder prestr = CreateLinkString(sArray);
+            logger.error("加盐前:{}" ,prestr);
             //把数组所有元素，按照“参数=参数值”的模式用“&”字符拼接成字符串
             try{
             	result = (charset ==null || charset.isEmpty())?MD5Coder.encodeMD5Hex(prestr.toString()+signKey):MD5Coder.encodeMD5Hex(prestr.toString()+signKey,charset);
-            	logger.debug("md5前|{}|md5后|{}",prestr.toString()+signKey,result);
+            	logger.debug("md5前后:{}|{}",prestr.toString()+signKey,result);
             }catch(Exception e){
             	logger.error("MD5异常:{}",e);
             }
