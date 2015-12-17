@@ -34,4 +34,16 @@ public abstract class MD5Coder {
 		// 执行消息摘要
 		return DigestUtils.md5Hex(data);
 	}
+	/**
+	 * MD5消息摘要
+	 * 
+	 * @param data 待做摘要处理的数据
+	 * @param charset 字符集
+	 * @return byte[] 消息摘要
+	 * @throws Exception
+	 */
+	public static String encodeMD5Hex(String data,String charset) throws Exception {
+		// 执行消息摘要
+		return DigestUtils.md5Hex(data.getBytes(charset));
+	}
 }
